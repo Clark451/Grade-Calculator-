@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simple Grade Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input, button, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+      border: none;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .result {
+      margin-top: 20px;
+      font-weight: bold;
+      color: #333;
+      white-space: pre-wrap;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2>Simple Grade Calculator</h2>
+
+  <label for="studentName">Student Name:</label>
+  <input type="text" id="studentName" placeholder="Enter student's name">
+
+  <label for="studentLevel">Student Level:</label>
+  <input type="text" id="studentLevel" placeholder="Enter student's level">
+
+  <label for="subjectCount">Number of Subjects:</label>
+  <input type="number" id="subjectCount" placeholder="e.g. 3">
+
+  <div class="actions">
+    <button onclick="generateSubjects()">Continue</button>
+    <button onclick="resetAll()" style="background: red;">Reset All</button>
+  </div>
+
+  <div id="subjectInputs"></div>
+  <div class="actions" id="calcActions"></div>
+  <div id="result" class="result"></div>
+</div>
+
+<script>
+  let lastSubjects = [];
+
+  function generateSubjects() {
+    const subjectInputs = document.getElementById("subjectInputs");
+    const calcActions = document.getElementById("calcActions");
+    subjectInputs.innerHTML = "";
+    calcActions.innerHTML = "";
+
+    const count = parseInt(document.getElementById("subjectCount").value);
+    if (!count || count <= 0) {
+      alert("Please enter a valid number of subjects.");
+      return;
+    }
+
+    lastSubjects = [];
+    for (let i = 0; i < count; i++) {
+      subjectInputs.innerHTML += `
+        <label>Subject ${i + 1} Name:</label>
+        <input type="text" id="subject${i}" placeholder="e.g. Math">
+        <label>Grade for Subject ${i + 1}:</label>
+        <input type="number" id="grade${i}" placeholder="e.g. 85">
+      `;
+    }
+
+    calcActions.innerHTML = `
+      <button onclick="calculateAverage(${count})">Calculate Average</button>
+      <button onclick="goBack()">⬅️ Back</button>
+      <button onclick="resetAll()" style="background: red;">Reset All</button>
+    `;
+  }
+
+  function goBack() {
+    document.getElementById("subjectInputs").innerHTML = "";
+    document.getElementById("calcActions").innerHTML = "";
+    document.getElementById("result").textContent = "";
+    document.getElementById("subjectCount").value = "";
+  }
+
+  function calculateAverage(count) {
+    const name = document.getElementById("studentName").value;
+    const level = document.getElementById("studentLevel").value;
+    let total = 0;
+    let resultText = `Student: ${name}\nLevel: ${level}\n\n`;
+
+    for (let i = 0; i < count; i++) {
+      const subject = document.getElementById(`subject${i}`).value;
+      const grade = parseFloat(document.getElementById(`grade${i}`).value);
+
+      if (!subject || isNaN(grade) || grade < 0 || grade > 100) {
+        alert(`Invalid input at Subject ${i + 1}.`);
+        return;
+      }
+      total += grade;
+      resultText += `${subject}: ${grade}\n`;
+    }
+
+    const average = (total / count).toFixed(2);
+    const status = average >= 75 ? "PASSED ✅" : "FAILED ❌";
+    resultText += `\nAverage: ${average}\nStatus: ${status}`;
+
+    document.getElementById("result").textContent = resultText;
+    document.getElementById("calcActions").innerHTML += `
+      <button onclick="exportToTxt()">Export as TXT</button>
+    `;
+  }
+
+  function exportToTxt() {
+    const content = document.getElementById("result").textContent;
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "grade_report.txt";
+    a.click();
+  }
+
+  function resetAll() {
+    location.reload();
+  }
+</script>
+</body>
+</html>
